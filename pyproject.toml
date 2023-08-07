@@ -1,0 +1,38 @@
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name="SnakeRun"
+description="Python script runner that handles dependencies"
+authors = [
+  { name="David C Ellis" },
+]
+readme="README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "prefab_classes",
+    "packaging"
+]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+]
+dynamic = ['version']
+
+[project.optional-dependencies]
+TEST = ["pytest"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.dynamic]
+version = {attr = "snakerun.__version__"}
+
