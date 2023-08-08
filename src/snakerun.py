@@ -43,9 +43,6 @@ PYVER_BLOCK_MARKERS = {
 }
 DEPENDENCY_BLOCK_MARKERS = {
     "script dependencies",
-    "script_dependencies",
-    "script-dependencies",
-    "scriptdependencies",
 }
 
 MAX_VENV_CACHESIZE = 10  # Don't keep more than this many virtualenvs
