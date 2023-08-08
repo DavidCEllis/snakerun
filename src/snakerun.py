@@ -30,7 +30,6 @@ Delete all virtual environments created by snake_run
 """
 
 import sys
-import io
 import os
 import os.path
 import abc
@@ -63,31 +62,6 @@ class PyenvMissingError(FileNotFoundError):
     """
     Error for when pyenv is not installed
     """
-
-
-# Edited copies from contextlib to avoid the import time.
-class _redirect_stream(abc.ABC):  # noqa
-    _stream = None
-
-    def __init__(self, new_target):
-        self.new_target = new_target
-        self._old_targets = []
-
-    def __enter__(self):
-        self._old_targets.append(getattr(sys, self._stream))
-        setattr(sys, self._stream, self.new_target)
-        return self.new_target
-
-    def __exit__(self, exctype, excinst, exctb):
-        setattr(sys, self._stream, self._old_targets.pop())
-
-
-class _redirect_stdout(_redirect_stream):  # noqa
-    _stream = "stdout"
-
-
-class _redirect_stderr(_redirect_stream):  # noqa
-    _stream = "stderr"
 
 
 platform = sys.platform
@@ -151,14 +125,20 @@ class DependencyData:
 
 
 def get_pyenv_versions():
-    version_info = io.StringIO()
-    with _redirect_stdout(version_info):
-        result = os.system("pyenv versions")
+    from packaging.version import Version, InvalidVersion
+    versions_folder = os.path.expanduser("~/.pyenv/versions")
+    if not os.path.exists(versions_folder):
+        raise PyenvMissingError("Could not find the pyenv versions folder")
 
-    if result != 0:
-        raise PyenvMissingError("Could not launch pyenv to manage python version")
-
-    version_info.seek(0)
-    versions = [line.strip() for line in version_info]
+    versions = []
+    for p in os.scandir(versions_folder):
+        try:
+            versions.append(Version(p.name))
+        except InvalidVersion:
+            pass
 
     return versions
+
+
+if __name__ == "__main__":
+    print(get_pyenv_versions())
