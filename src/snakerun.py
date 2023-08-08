@@ -32,16 +32,21 @@ Delete all virtual environments created by snake_run
 import sys
 import os
 import os.path
-import abc
 
-from prefab_classes import prefab, attribute
 
 __version__ = "0.0.1a1"
 version_pth = __version__.replace(".", "_")
 
 LAUNCHER_NAME = "snakerun"
-PYVER_BLOCK_MARKER = "x-requires-python"
-DEPENDENCY_BLOCK_MARKER = "script dependencies"
+PYVER_BLOCK_MARKERS = {
+    "x-requires-python",
+}
+DEPENDENCY_BLOCK_MARKERS = {
+    "script dependencies",
+    "script_dependencies",
+    "script-dependencies",
+    "scriptdependencies",
+}
 
 MAX_VENV_CACHESIZE = 10  # Don't keep more than this many virtualenvs
 
@@ -80,10 +85,26 @@ else:
 CACHE_INFO_FILE = os.path.join(CACHE_PATH, f"CACHE_INFO_{version_pth}")
 
 
-@prefab
 class DependencyData:
     python_specifier: None | str
     dependencies: list[str]
+
+    def __init__(self, python_specifier: None | str, dependencies: list[str]):
+        self.python_specifier = python_specifier
+        self.dependencies = dependencies
+
+    def __repr__(self):
+        return (
+            f"{type(self).__name__}("
+            f"python_specifier={self.python_specifier}, "
+            f"dependencies={self.dependencies}"
+            f")"
+        )
+
+    def __eq__(self, other):
+        if self.__class__ == other.__class__:
+            return (self.python_specifier, self.dependencies) == (other.python_specifier, other.dependencies)
+        return False
 
     @classmethod
     def from_file(cls, script_path: str | os.PathLike):
@@ -97,29 +118,32 @@ class DependencyData:
             in_dependency_block = False
 
             for line in f:
-                if in_dependency_block:
-                    if line.startswith("#"):
-                        data, *_ = line[2:].partition(" # ")
-                        deps.append(data.strip())
-                    else:
-                        in_dependency_block = False
-                elif line.strip().lower() == f"# {DEPENDENCY_BLOCK_MARKER}:":
-                    if deps:
-                        raise MetadataError(
-                            f"'{DEPENDENCY_BLOCK_MARKER}'"
-                            f" block defined multiple times in script"
-                        )
-                    in_dependency_block = True
-                elif line.lower().startswith(f"# {PYVER_BLOCK_MARKER}:"):
-                    if python_specifier:
-                        raise MetadataError(
-                            f"'{PYVER_BLOCK_MARKER}'"
-                            f" block defined multiple times in script"
-                        )
-                    python_specifier = line[2:].partition(":")[2].strip()
+                if line.startswith("#"):
+                    line = line[1:].partition(" # ")[0].strip()  # strip comments and leading '#'
+                    if not line:
+                        continue  # Skip blank or all comment lines
 
-                if python_specifier and deps:
-                    break
+                    if in_dependency_block:
+                        deps.append(line)
+                    else:
+                        header, _, extra = (item.strip() for item in line.lower().partition(":"))
+                        if header in DEPENDENCY_BLOCK_MARKERS:
+                            if deps:
+                                raise MetadataError(
+                                    "Script Dependencies block defined multiple times in script"
+                                )
+                            in_dependency_block = True
+                        elif header in PYVER_BLOCK_MARKERS:
+                            if python_specifier:
+                                raise MetadataError(
+                                    f"x-requires-python block defined multiple times in script"
+                                )
+                            python_specifier = extra
+                else:
+                    if in_dependency_block:
+                        in_dependency_block = False
+                    if python_specifier and deps:
+                        break
 
         return cls(python_specifier, deps)  # noqa
 
@@ -137,8 +161,11 @@ def get_pyenv_versions():
         except InvalidVersion:
             pass
 
+    versions.sort(reverse=True)
+
     return versions
 
 
 if __name__ == "__main__":
-    print(get_pyenv_versions())
+    d = DependencyData.from_file(sys.argv[1])
+    print(d)

@@ -29,13 +29,12 @@ Otherwise if python version and dependencies are given, the script will use
 the newest python version installed that matches the requirement to create
 a virtualenv with the listed dependencies.
 
-If only a python version is given, if the version running `snakerun.py` 
-satisfies the requirement the script will run in that version. Otherwise
-it will attempt to find the newest python installed that satisfies the 
-requirement and use that.
+If only a python version is given, if sys.executable satisfies the requirement
+it will be used. Otherwise the script will attempt to find the newest python 
+installed that satisfies the requirement and use that.
 
-If only dependencies are given, the version of python running `snakerun.py`
-will be used to create the environment.
+If only dependencies are given, `sys.executable` will be used to create 
+the environment.
 
 If no python version or dependencies are given, the version of python
 running `snakerun.py` will launch the script.
@@ -49,4 +48,4 @@ case is the time it takes to parse the dependency format and find the
 cached environment.
 
 This leads to avoiding some otherwise useful stdlib modules as importing
-them takes as long as launching python from scratch.
+them takes as long as launching python from scratch. 
