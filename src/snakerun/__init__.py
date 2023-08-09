@@ -30,7 +30,6 @@ Command-line arguments:
 """
 
 import sys
-import os
 import os.path
 
 from .core import DependencyData, VEnvCache
@@ -64,9 +63,12 @@ CACHE_INFO_FILE = os.path.join(CACHE_PATH, f"CACHE_INFO_{version_pth}")
 def main():
     print("Launching with snakerun:")
 
-    if 're' in sys.modules:
-        print("Detected 're' import, fixing entrypoint script to avoid unnecessary import.")
-
+    if 're' in sys.modules and sys.platform in ("linux", "darwin"):
+        print(
+            "Detected 're' import, "
+            "Run `python -m snakerun --fixlauncher` "
+            "to attempt to remove unnecessary import."
+        )
 
     if sys.argv[1] == "--clear-cache":
         from .build_env import clear_cache
