@@ -49,7 +49,7 @@ class DependencyData:
 
     def __eq__(self, other):
         if self.__class__ == other.__class__:
-            return (self.pyver, self.dependencies) == (other.pyver, other.dependencies)
+            return (self.pyver, self.dependencies) == (other.pyver, other.spec)
         return False
 
     @property
@@ -101,18 +101,26 @@ class DependencyData:
 
 class VEnv:
     python_path: str
-    dependencies: DependencyData
+    spec: DependencyData
 
-    def __init__(self, path, dependencies):
+    def __init__(self, path, spec):
         self.python_path = path
-        self.dependencies = dependencies
+        self.spec = spec
 
     def __repr__(self):
         return (
             f"{type(self).__name__}("
             f"python_path={self.python_path!r}, "
-            f"dependencies={self.dependencies!r}"
+            f"spec={self.spec!r}"
             f")"
+        )
+
+    def to_string(self):
+        dep_list = "\n".join(self.spec.dependencies)
+        return (
+            f"{self.python_path}\n"
+            f"{self.spec}\n"
+            f"{dep_list}\n"
         )
 
 
@@ -139,3 +147,7 @@ class VEnvCache:
             venvs.append(VEnv(path, DependencyData(pyver, deps)))
 
         return cls(venvs)
+
+    def to_cache(self, cache_info_file):
+        with open(cache_info_file, 'w', encoding="utf-8") as f:
+            f.write("\n".join(v.to_string() for v in self.venvs))

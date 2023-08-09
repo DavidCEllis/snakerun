@@ -80,15 +80,13 @@ def main():
 
     for env in cached_envs.venvs:
         # Cache hit
-        if env.dependencies == script_dependencies:
+        if env.spec == script_dependencies:
             python_path = env.python_path
             break
     else:
         # No cache hit
         from . import build_env
         python_path = build_env.build(script_dependencies, cached_envs)
-
-        # raise NotImplementedError("Not yet Implemented")
 
     args = [
         python_path,

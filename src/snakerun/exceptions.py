@@ -10,6 +10,12 @@ class MetadataError(Exception):
     """
 
 
+class NoMatchingPythonVersion(Exception):
+    """
+    Python version could not be found that matches the requirement
+    """
+
+
 class PyenvMissingError(FileNotFoundError):
     """
     Error for when pyenv is not installed
