@@ -59,7 +59,6 @@ CACHE_INFO_FILENAME = f"CACHE_INFO_{version_pth}"
 
 
 def main():
-    print("Launching with snakerun:")
 
     # re can be removed for faster launch on linux/osx
     # windows entry points use zipapp which uses re internally
@@ -71,9 +70,12 @@ def main():
         )
 
     if sys.argv[1] == "--clear-cache":
+        print(f"Removing cache folder {CACHE_PATH}")
         from .build_env import clear_cache
         clear_cache(CACHE_PATH)
         return
+
+    print("Launching with snakerun:")
 
     script_spec = DependencySpec.from_script(sys.argv[1])
 

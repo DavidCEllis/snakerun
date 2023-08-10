@@ -10,6 +10,7 @@ import os.path
 # The slow modules avoided in core
 import re
 import subprocess
+import shutil
 
 from packaging.version import Version, InvalidVersion
 from packaging.requirements import SpecifierSet
@@ -23,7 +24,7 @@ python_v_re = re.compile(r"^Python\s+(\d+.\d+.\d+)$")
 
 
 def clear_cache(cache_folder):
-    pass
+    shutil.rmtree(cache_folder)
 
 
 def get_pyenv_versions() -> list[tuple[Version, str]]:
