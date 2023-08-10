@@ -20,6 +20,9 @@ def clear_cache(cache_folder):
 
 
 def get_pyenv_versions() -> list[tuple[Version, str]]:
+    """
+    Get potential python versions from pyenv (for linux and macos)
+    """
     versions_folder = os.path.expanduser("~/.pyenv/versions")
     if not os.path.exists(versions_folder):
         return []
@@ -34,6 +37,12 @@ def get_pyenv_versions() -> list[tuple[Version, str]]:
     versions.sort(reverse=True, key=lambda x: x[0])
 
     return versions
+
+
+def get_py_versions() -> list[tuple[Version, str]]:
+    """
+    Get potential python versions from the windows 'py' launcher.
+    """
 
 
 def get_python_exe(py_specifier: SpecifierSet) -> str:
@@ -54,6 +63,10 @@ def build(requirements: DependencyData, venvs: VEnvCache):
     # Get the current python version
     python_exe = get_python_exe(SpecifierSet(requirements.pyver))
 
-    print(python_exe)
+    # Build VENV
+
+    # Install Modules
+
+    # Handle venv cache
 
     return python_exe
