@@ -32,7 +32,7 @@ Command-line arguments:
 import sys
 import os.path
 
-from .core import DependencyData, VEnvCache
+from .core import DependencySpec, VEnvCache
 from .exceptions import MetadataError, UnsupportedPlatform
 
 
@@ -41,12 +41,10 @@ version_pth = __version__.replace(".", "_")
 
 LAUNCHER_NAME = "snakerun"
 
-MAX_VENV_CACHESIZE = 10  # Don't keep more than this many virtualenvs
-
 platform = sys.platform
 
 if platform == "win32":
-    CACHE_PATH = os.path.expandvars(f"%LOCALAPPDATA%/{LAUNCHER_NAME}/venv_cache")
+    CACHE_PATH = os.path.expandvars(f"%LOCALAPPDATA%\\{LAUNCHER_NAME}\\venv_cache")
 elif platform == "linux":
     CACHE_PATH = os.path.expanduser(f"~/.{LAUNCHER_NAME}/venv_cache")
 elif platform == "darwin":
@@ -57,12 +55,14 @@ else:
     raise UnsupportedPlatform(f"'{platform}' is currently not supported.")
 
 
-CACHE_INFO_FILE = os.path.join(CACHE_PATH, f"CACHE_INFO_{version_pth}")
+CACHE_INFO_FILENAME = f"CACHE_INFO_{version_pth}"
 
 
 def main():
     print("Launching with snakerun:")
 
+    # re can be removed for faster launch on linux/osx
+    # windows entry points use zipapp which uses re internally
     if 're' in sys.modules and sys.platform in ("linux", "darwin"):
         print(
             "Detected 're' import, "
@@ -75,29 +75,31 @@ def main():
         clear_cache(CACHE_PATH)
         return
 
-    script_dependencies = DependencyData.from_script(sys.argv[1])
-    cached_envs = VEnvCache.from_cache(CACHE_INFO_FILE)
+    script_spec = DependencySpec.from_script(sys.argv[1])
 
-    for env in cached_envs.venvs:
-        # Cache hit
-        if env.spec == script_dependencies:
-            python_path = env.python_path
-            break
+    if script_spec.satisfied():
+        python_path = sys.executable
     else:
-        # No cache hit
-        from . import build_env
-        python_path = build_env.build(script_dependencies, cached_envs)
+        cached_envs = VEnvCache.from_cache(CACHE_PATH)
+        for env in cached_envs.venvs:
+            if env.spec == script_spec:
+                python_path = env.python_path
+                break
+        else:
+            from . import build_env
+            python_path = build_env.build(script_spec, cached_envs)
 
     args = [
         python_path,
         *sys.argv[1:]
     ]
 
-    print(python_path)
-
     sys.stdout.flush()
-    # os.execvp(python_path, args)
+
+    response = os.spawnv(os.P_WAIT, python_path, args)
+
+    return response
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
