@@ -79,12 +79,18 @@ def main():
 
     script_spec = DependencySpec.from_script(sys.argv[1])
 
-    if script_spec.satisfied():
+    if script_spec.nospec():
         python_path = sys.executable
     else:
         cached_envs = VEnvCache.from_cache(CACHE_PATH)
         for env in cached_envs.venvs:
             if env.spec == script_spec:
+                # Move this env to the end of the list
+                # resort the cache
+                cached_envs.venvs.remove(env)
+                cached_envs.venvs.append(env)
+                cached_envs.to_cache()
+
                 python_path = env.python_path
                 break
         else:
@@ -95,8 +101,6 @@ def main():
         python_path,
         *sys.argv[1:]
     ]
-
-    sys.stdout.flush()
 
     response = os.spawnv(os.P_WAIT, python_path, args)
 

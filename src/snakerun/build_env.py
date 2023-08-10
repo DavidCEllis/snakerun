@@ -117,7 +117,7 @@ def build(specification: DependencySpec, cache: VEnvCache):
     python_exe = get_python_exe(SpecifierSet(specification.pyver))
 
     # Remove existing VENV if cache size is too large
-    while len(cache.venvs) > cache.MAX_CACHESIZE:
+    while len(cache.venvs) >= cache.MAX_CACHESIZE:
         env = cache.venvs.pop(0)
         env.delete_venv()
         del env
@@ -144,7 +144,8 @@ def build(specification: DependencySpec, cache: VEnvCache):
             "venv",
             venv_folder
         ],
-        check=True
+        check=True,
+        capture_output=True
     )
     venv = VEnv(venv_folder, specification)
 
@@ -163,10 +164,12 @@ def build(specification: DependencySpec, cache: VEnvCache):
                 "install",
                 "--upgrade",
                 "pip"
-            ]
+            ],
+            check=True,
+            capture_output=True
         )
 
-        print("Installing Dependencies")
+        print("Installing Dependencies: " + ", ".join(f"{dep!r}" for dep in venv.spec.dependencies))
         # -- Install Modules --
         subprocess.run(
             [
@@ -175,7 +178,9 @@ def build(specification: DependencySpec, cache: VEnvCache):
                 "pip",
                 "install",
                 *venv.spec.dependencies
-            ]
+            ],
+            check=True,
+            capture_output=True
         )
 
     return python_exe

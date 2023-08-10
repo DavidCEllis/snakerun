@@ -28,7 +28,7 @@ class DependencySpec:
             self.pyver = pyver
             self.version_given = True
         else:
-            self.pyver = f"=={current_python_version()}"
+            self.pyver = f"~={current_python_version()}"
             self.version_given = False
 
         self.dependencies = dependencies
@@ -46,15 +46,11 @@ class DependencySpec:
             return (self.pyver, self.dependencies) == (other.pyver, other.dependencies)
         return False
 
-    def satisfied(self):
+    def nospec(self):
         """
-        return True if the parent env satisfies the requirements
+        return True if there was no version or dependencies given
         """
-        if (
-            self.pyver == f"=={current_python_version()}" or not self.version_given
-        ) and not self.dependencies:
-            return True
-        return False
+        return not (self.version_given or self.dependencies)
 
     def check_requirements(self):
         from packaging.requirements import Requirement
@@ -144,7 +140,7 @@ class VEnv:
 
 
 class VEnvCache:
-    MAX_CACHESIZE = 10  # Don't keep more than this many virtualenvs
+    MAX_CACHESIZE = 5  # Don't keep more than this many virtualenvs
     ENV_PREFIX = "cached_venv_"
 
     cache_path: str
