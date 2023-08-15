@@ -47,7 +47,21 @@ then the script will be launched.
 If no python version or dependencies are given, the version of python
 running `snakerun.py` will launch the script without creating a venv.
 
-## Performance considerations ##
+## Why not TOML ##
+
+It is faster to parse this block than it is to import any of the main 
+python toml libraries.
+
+```
+Summary
+  'python perf/parse_dependencies.py' ran
+    1.99 ± 0.29 times faster than 'python -c "import pytomlpp"'
+    2.38 ± 0.32 times faster than 'python -c "import rtoml"'
+    2.42 ± 0.32 times faster than 'python -c "import tomllib"'
+    3.53 ± 0.46 times faster than 'python -c "import tomlkit"'
+```
+
+## Other performance considerations ##
 
 Much like prefab_classes this goes to some lengths to keep the start time
 as low as possible (for python). Ideally the only overhead in the optimal 
