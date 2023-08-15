@@ -68,12 +68,17 @@ as low as possible (for python). Ideally the only overhead in the optimal
 case is the time it takes to parse the dependency format and find the 
 cached environment.
 
-This leads to avoiding some otherwise useful stdlib modules as importing
+This leads to avoiding some otherwise useful modules as importing
 them takes as long as launching python from scratch.
 
 * `re` would probably be cleaner than looking for string matches but 
   adds 60% to the launch time (on my development machine)
+  * This is actually still used when pip installed as part of the entrypoint
+    script that is generated. There is a script included to replace that 
+    entrypoint script if so desired.
   * Note: on windows `re` gets used as part of the zipapp format anyway
+* `argparse` would be useful to allow for the addition of command line arguments
+  but nearly doubles the launch time.
 * `subprocess` is the new intended way to launch processes, but `os.spawnv`
   is used in the fast path because importing subprocess doubles the launch time
 * `packaging` is useful to compare specifications but its use is delayed until
