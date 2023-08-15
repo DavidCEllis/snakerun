@@ -1,9 +1,9 @@
+**Currently the format used for this is still subject to change.**
+**This is currently experimental and only lightly tested - use at your own risk**
+
 # SnakeRun #
 
-Launch python scripts with dependencies and python version handled
-
-*Requires pyenv installed to handle python versions*
-
+Launch python scripts with specific python versions and dependencies.
 
 ## How to use ##
 
@@ -18,27 +18,33 @@ eg:
 
 Optionally specify python version with a non-standard `# x-requires-python: >=3.10`.
 
-Run with `python snakerun.py myscript.py`
+Run with `snakerun myscript.py`
+Clear caches with `snakerun --clear-cache`
 
 ## Logic ##
 
-If an environment matching the exact text of the dependencies exists in the 
-SnakeRun cache, that environment will be used.
+In order to save time on launching, environments are cached based upon 
+the exact text of the specification. If a text match can be found then 
+the matching environment will be used without any further comparison.
 
-Otherwise if python version and dependencies are given, the script will use
-the newest python version installed that matches the requirement to create
-a virtualenv with the listed dependencies.
+If there is no match then a new venv will be generated. If a python
+version is given it will be checked against the version used to launch
+`snakerun` first. If that is sufficient it will be used to create the venv.
 
-If only a python version is given, if sys.executable satisfies the requirement
-it will be used. Otherwise the script will attempt to find the newest python 
-installed that satisfies the requirement and use that.
+Otherwise:
+* On Windows:
+  * `snakerun` will ask the `py` launcher for available python versions
+    if a sufficient version is found that will be used, otherwise an 
+    error will be raised. (On windows this will only look for 3.X, not 3.X.Y)
+* On Linux/MacOS:
+  * `snakerun` will look for `pyenv` environments. If a sufficient version
+    is found that will be used, otherwise an error will be raised.
 
-If only dependencies are given, `sys.executable` will be used to create 
-the environment.
+If dependencies are specified they will be installed into the new venv and
+then the script will be launched.
 
 If no python version or dependencies are given, the version of python
-running `snakerun.py` will launch the script.
-
+running `snakerun.py` will launch the script without creating a venv.
 
 ## Performance considerations ##
 
@@ -48,4 +54,16 @@ case is the time it takes to parse the dependency format and find the
 cached environment.
 
 This leads to avoiding some otherwise useful stdlib modules as importing
-them takes as long as launching python from scratch. 
+them takes as long as launching python from scratch.
+
+* `re` would probably be cleaner than looking for string matches but 
+  adds 60% to the launch time (on my development machine)
+  * Note: on windows `re` gets used as part of the zipapp format anyway
+* `subprocess` is the new intended way to launch processes, but `os.spawnv`
+  is used in the fast path because importing subprocess doubles the launch time
+* `packaging` is useful to compare specifications but its use is delayed until
+  after the initial comparison because importing `packaging.specifiers` would
+  make launching take 4x longer.
+
+If no match is found this time is largely insignificant as the time to create
+the venv and install dependencies will be much more noticeable.
