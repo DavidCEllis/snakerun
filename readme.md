@@ -1,6 +1,6 @@
 **The format used for this is still subject to change.**
 
-**This is currently an experiment and only lightly tested.**
+**This is currently an experiment with using the PEP-722 style dependency format and is only lightly tested.**
 
 # SnakeRun #
 
