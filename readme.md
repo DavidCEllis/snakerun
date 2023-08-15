@@ -1,4 +1,4 @@
-**Currently the format used for this is still subject to change.**
+**The format used for this is still subject to change.**
 
 **This is currently an experiment and only lightly tested.**
 
