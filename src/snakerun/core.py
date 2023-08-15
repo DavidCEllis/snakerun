@@ -101,7 +101,7 @@ class DependencySpec:
                     if python_specifier and deps:
                         break
 
-        return cls(python_specifier, deps)
+        return cls(pyver=python_specifier, dependencies=deps)
 
 
 class VEnv:
