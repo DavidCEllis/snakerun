@@ -1,5 +1,6 @@
 **Currently the format used for this is still subject to change.**
-**This is currently experimental and only lightly tested - use at your own risk**
+
+**This is currently an experiment and only lightly tested - use at your own risk**
 
 # SnakeRun #
 
