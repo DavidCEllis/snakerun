@@ -61,6 +61,12 @@ Summary
     3.53 ± 0.46 times faster than 'python -c "import tomlkit"'
 ```
 
+This isn't to say any of these libraries are 'bad' or 'slow'. Parsing a TOML
+file in general is more complex than parsing the simple PEP-722 block. In service 
+of parsing the more complex data or for maintainability these modules have 
+made different choices which have a noticeable impact on import performance
+and make them less suitable for this specific use case.
+
 ## Other performance considerations ##
 
 Much like prefab_classes this goes to some lengths to keep the start time
