@@ -25,8 +25,8 @@ Clear caches with `snakerun --clear-cache`
 ## Logic ##
 
 In order to save time on launching, environments are cached based upon 
-the exact text of the specification. If a text match can be found then 
-the matching environment will be used without any further comparison.
+the specification, not the environment. An environment will only be 
+reused if the **specification** matches.
 
 If there is no match then a new venv will be generated. If a python
 version is given it will be checked against the version used to launch
@@ -47,37 +47,19 @@ then the script will be launched.
 If no python version or dependencies are given, the version of python
 running `snakerun.py` will launch the script without creating a venv.
 
-## Why not TOML ##
 
-It is faster to parse this block than it is to import any of the main 
-python toml libraries.
+## Performance considerations ##
 
-```
-Summary
-  'python perf/parse_dependencies.py' ran
-    1.99 ± 0.29 times faster than 'python -c "import pytomlpp"'
-    2.38 ± 0.32 times faster than 'python -c "import rtoml"'
-    2.42 ± 0.32 times faster than 'python -c "import tomllib"'
-    3.53 ± 0.46 times faster than 'python -c "import tomlkit"'
-```
+As a tool that is intended to start, find an environment matching and launch
+as quickly as possible in the fast case, many modules that would otherwise
+make development easier are avoided in the code that will be loaded
+in this case.
 
-This isn't to say any of these libraries are 'bad' or 'slow'. Parsing a TOML
-file in general is more complex than parsing the simple PEP-722 block. In service 
-of parsing the more complex data or for maintainability these modules have 
-made different choices which have a noticeable impact on import performance
-and make them less suitable for this specific use case.
+Most of the available argument parsers and the modules they depend on
+add a significant proportion of runtime so the current goal is to avoid
+them if possible.
 
-## Other performance considerations ##
-
-Much like prefab_classes this goes to some lengths to keep the start time
-as low as possible (for python). Ideally the only overhead in the optimal 
-case is the time it takes to parse the dependency format and find the 
-cached environment.
-
-This leads to avoiding some otherwise useful modules as importing
-them takes as long as launching python from scratch.
-
-* `re` would probably be cleaner than looking for string matches but 
+* `re` would be necessary for most current commandline parsers but 
   adds 60% to the launch time (on my development machine)
   * This is actually still used when pip installed as part of the entrypoint
     script that is generated. There is a script included to replace that 
@@ -91,5 +73,4 @@ them takes as long as launching python from scratch.
   after the initial comparison because importing `packaging.specifiers` would
   make launching take 4x longer.
 
-If no match is found this time is largely insignificant as the time to create
-the venv and install dependencies will be much more noticeable.
+All of these are used when it is clear that a new env will have to be constructed.
