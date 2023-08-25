@@ -1,8 +1,6 @@
 [build-system]
-requires = [
-    "setuptools",
-]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1.2,<2.0"]
+build-backend = "maturin"
 
 [project]
 name="SnakeRun"
@@ -38,3 +36,7 @@ package-dir = {"" = "src"}
 [tool.setuptools.dynamic]
 version = {attr = "snakerun.__version__"}
 
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "snakerun.internals._internals_rs"
+python-source = "src"

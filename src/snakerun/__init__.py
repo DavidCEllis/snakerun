@@ -17,12 +17,10 @@ import os.path
 
 from .core import DependencySpec, VEnvCache
 from .exceptions import MetadataError, UnsupportedPlatform
+from .constants import LAUNCHER_NAME
 
-
-__version__ = "0.0.1a1"
+__version__ = "0.1.0"
 version_pth = __version__.replace(".", "_")
-
-LAUNCHER_NAME = "snakerun"
 
 platform = sys.platform
 
@@ -52,11 +50,15 @@ def main():
             "to attempt to remove unnecessary import."
         )
 
+    if len(sys.argv) <= 1:
+        print("No path given to script")
+        return 0
+
     if sys.argv[1] == "--clear-cache":
         print(f"Removing cache folder {CACHE_PATH}")
         from .build_env import clear_cache
         clear_cache(CACHE_PATH)
-        return
+        return 0
 
     print("Launching with snakerun:")
 

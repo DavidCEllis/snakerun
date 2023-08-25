@@ -31,9 +31,9 @@ def get_pyenv_versions() -> list[tuple[Version, str]]:
     """
     Get potential python versions from pyenv (for linux and macos)
     """
-    versions_folder = os.path.expanduser("~/.pyenv/versions")
+    versions_folder = os.path.expandvars("${PYENV_ROOT}/versions")
     if not os.path.exists(versions_folder):
-        print("Could not find pyenv versions folder on user path.")
+        print("Could not find pyenv versions folder.")
         return []
 
     versions = []

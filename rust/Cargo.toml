@@ -1,0 +1,17 @@
+[package]
+name = "snakerun"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "snakerun"
+# "cdylib" is necessary to produce a shared library for Python to import from.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+regex = "1.9.3"
+
+
+[dependencies.pyo3]
+version = "0.19.2"
+features = ["abi3-py310"]

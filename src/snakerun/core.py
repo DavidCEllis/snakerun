@@ -3,14 +3,7 @@ import os
 import os.path
 
 from .exceptions import MetadataError
-
-
-PYVER_BLOCK_MARKERS = {
-    "x-requires-python",
-}
-DEPENDENCY_BLOCK_MARKERS = {
-    "script dependencies",
-}
+from .constants import PYVER_BLOCK_MARKERS, DEPENDENCY_BLOCK_MARKERS
 
 
 def current_python_version():
