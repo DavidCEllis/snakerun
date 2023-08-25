@@ -12,4 +12,6 @@ dist/
 perftemp.py
 hyperfine_testfiles/
 
-*/Cargo.lock
+rust/Cargo.lock
+rust/target/
+*.so
