@@ -4,9 +4,9 @@ from ..constants import PYVER_BLOCK_MARKERS, DEPENDENCY_BLOCK_MARKERS
 from ..exceptions import MetadataError
 
 
-def parse_pep_722(source_file: str | os.PathLike) -> tuple[str, list[str]]:
+def parse_pep722(source_file: str | os.PathLike) -> tuple[str, list[str]]:
     """
-    Parse a PEP 722 Dependency block and return a DependencyData object
+    Python implementation of the PEP722 Parser
     """
     pyver = None
     dependencies = []

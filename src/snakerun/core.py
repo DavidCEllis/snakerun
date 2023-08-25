@@ -2,8 +2,7 @@ import sys
 import os
 import os.path
 
-from .exceptions import MetadataError
-from .constants import PYVER_BLOCK_MARKERS, DEPENDENCY_BLOCK_MARKERS
+from .internals import parse_pep722
 
 
 def current_python_version():
@@ -53,48 +52,10 @@ class DependencySpec:
     @classmethod
     def from_script(cls, script_path: str | os.PathLike):
         """
-        Parse a PEP 722 Dependency block and return a DependencyData object
+        Get dependencies from a script file
         """
-        python_specifier = None
-        deps = []
-
-        with open(script_path, "r", encoding="utf-8") as f:
-            in_dependency_block = False
-
-            for line in f:
-                if line.startswith("#"):
-                    # strip comments and leading '#'
-                    line = line[1:].partition(" # ")[0].strip()
-                    if not line:
-                        continue  # Skip blank or all comment lines
-
-                    if in_dependency_block:
-                        deps.append(line)
-                    else:
-                        header, _, extra = (
-                            item.strip() for item in line.lower().partition(":")
-                        )
-                        if header in DEPENDENCY_BLOCK_MARKERS:
-                            if deps:
-                                raise MetadataError(
-                                    "Script Dependencies block "
-                                    "defined multiple times in script"
-                                )
-                            in_dependency_block = True
-                        elif header in PYVER_BLOCK_MARKERS:
-                            if python_specifier:
-                                raise MetadataError(
-                                    f"x-requires-python block "
-                                    f"defined multiple times in script"
-                                )
-                            python_specifier = extra
-                else:
-                    if in_dependency_block:
-                        in_dependency_block = False
-                    if python_specifier and deps:
-                        break
-
-        return cls(pyver=python_specifier, dependencies=deps)
+        pyver, deps = parse_pep722(script_path)
+        return cls(pyver, deps)
 
 
 class VEnv:

@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use std::io;
+use pyo3::types::PyString;
 use std::io::{BufRead, BufReader};
 use std::fs::File;
 
@@ -13,7 +13,7 @@ mod snakerun_ex {
 }
 
 #[pyfunction]
-pub fn parse_pep722(source_path: &String) -> PyResult<(Option<String>, Vec<String>)> {
+pub fn parse_pep722(source_path: &PyString) -> PyResult<(Option<String>, Vec<String>)> {
     // Make case insensitive header regex
     let pyver_re: Regex = Regex::new(PYVER_RE_STR).unwrap();
     let header_re: Regex = Regex::new(HEADER_RE_STR).unwrap();
@@ -21,7 +21,7 @@ pub fn parse_pep722(source_path: &String) -> PyResult<(Option<String>, Vec<Strin
     let mut pyver: Option<String> = None;
     let mut dependencies: Vec<String> = vec![];
 
-    let source_file = File::open(source_path)?;
+    let source_file = File::open(source_path.to_str().unwrap())?;
 
     let source_reader = BufReader::new(source_file);
 
@@ -34,7 +34,7 @@ pub fn parse_pep722(source_path: &String) -> PyResult<(Option<String>, Vec<Strin
             if line.starts_with("#") {
                 let mut dependency = line[1..].trim();
                 if !dependency.is_empty() {
-                    // Remove in-line comments if present
+                    // Remove in-line comment if present
                     if let Some(split_dep) = dependency.split_once(" # ") {
                         dependency = split_dep.0
                     }
@@ -60,12 +60,19 @@ pub fn parse_pep722(source_path: &String) -> PyResult<(Option<String>, Vec<Strin
                     let ver = pyver_captures.name("version").unwrap();
 
                     // Only add python version from the first example of this string
-                    if pyver.is_some() {
-                        return Err(snakerun_ex::MetadataError::new_err(
-                           "x-requires-python block defined multiple times in script."
-                        ));
-                    } else {
-                        pyver = Some(String::from(ver.as_str()));
+                    match pyver {
+                        Some(_) => {
+                            return Err(snakerun_ex::MetadataError::new_err(
+                                "x-requires-python block defined multiple times in script."
+                            ));
+                        }
+                        None => {
+                            let mut ver_str = ver.as_str();
+                            if let Some(sp) = ver_str.split_once(" # ") {
+                                ver_str = sp.0;
+                            }
+                            pyver = Some(String::from(ver_str));
+                        }
                     }
                 }
             }

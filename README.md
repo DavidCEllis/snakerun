@@ -50,27 +50,5 @@ running `snakerun.py` will launch the script without creating a venv.
 
 ## Performance considerations ##
 
-As a tool that is intended to start, find an environment matching and launch
-as quickly as possible in the fast case, many modules that would otherwise
-make development easier are avoided in the code that will be loaded
-in this case.
-
-Most of the available argument parsers and the modules they depend on
-add a significant proportion of runtime so the current goal is to avoid
-them if possible.
-
-* `re` would be necessary for most current commandline parsers but 
-  adds 60% to the launch time (on my development machine)
-  * This is actually still used when pip installed as part of the entrypoint
-    script that is generated. There is a script included to replace that 
-    entrypoint script if so desired.
-  * Note: on windows `re` gets used as part of the zipapp format anyway
-* `argparse` would be useful to allow for the addition of command line arguments
-  but nearly doubles the launch time.
-* `subprocess` is the new intended way to launch processes, but `os.spawnv`
-  is used in the fast path because importing subprocess doubles the launch time
-* `packaging` is useful to compare specifications but its use is delayed until
-  after the initial comparison because importing `packaging.specifiers` would
-  make launching take 4x longer.
-
-All of these are used when it is clear that a new env will have to be constructed.
+Some elements are being written in both rust with fallback implementations 
+in python where performance is a concern on the fast path. 
