@@ -11,6 +11,8 @@ _build/
 dist/
 perftemp.py
 hyperfine_testfiles/
+*.pyc
+__pycache__/
 
 rust/Cargo.lock
 rust/target/
