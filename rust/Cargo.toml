@@ -9,6 +9,8 @@ name = "snakerun"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+clap = { version = "4.4.0", features = ["cargo"] }
+json = "0.12.4"
 regex = "1.9.3"
 
 

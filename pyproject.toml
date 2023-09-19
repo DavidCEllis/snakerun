@@ -12,7 +12,8 @@ readme="README.md"
 requires-python = ">=3.10"
 dependencies = [
     "distlib",
-    "packaging"
+    "packaging",
+    "prefab-classes",
 ]
 classifiers = [
     "Development Status :: 1 - Planning",
