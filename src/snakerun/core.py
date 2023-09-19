@@ -2,6 +2,8 @@ import sys
 import os
 import os.path
 
+from prefab_classes import prefab, attribute
+
 from .internals import parse_pep722
 
 
@@ -11,32 +13,15 @@ def current_python_version():
     return f"{v.major}.{v.minor}"
 
 
+@prefab
 class DependencySpec:
     pyver: str
     dependencies: list[str]
+    version_given: bool = attribute(init=False, compare=False, repr=False)
 
-    def __init__(self, pyver: None | str, dependencies: list[str]):
-        if pyver:
-            self.pyver = pyver
-            self.version_given = True
-        else:
-            self.pyver = f"~={current_python_version()}"
-            self.version_given = False
-
-        self.dependencies = dependencies
-
-    def __repr__(self):
-        return (
-            f"{type(self).__name__}("
-            f"pyver={self.pyver!r}, "
-            f"dependencies={self.dependencies!r}"
-            f")"
-        )
-
-    def __eq__(self, other):
-        if self.__class__ == other.__class__:
-            return (self.pyver, self.dependencies) == (other.pyver, other.dependencies)
-        return False
+    def __prefab_post_init__(self, pyver: None | str):
+        self.pyver = pyver if pyver else f"~={current_python_version()}"
+        self.version_given = True if pyver else False
 
     def nospec(self):
         """
@@ -54,25 +39,16 @@ class DependencySpec:
         """
         Get dependencies from a script file
         """
+        if type(script_path) is not str:  # strict check for 'str' - not a subclass either.
+            script_path = str(script_path)
         pyver, deps = parse_pep722(script_path)
         return cls(pyver, deps)
 
 
+@prefab
 class VEnv:
     env_folder: str
     spec: DependencySpec
-
-    def __init__(self, env_folder, spec):
-        self.env_folder = env_folder
-        self.spec = spec
-
-    def __repr__(self):
-        return (
-            f"{type(self).__name__}("
-            f"env_folder={self.env_folder!r}, "
-            f"spec={self.spec!r}"
-            f")"
-        )
 
     @property
     def python_path(self):
@@ -93,24 +69,13 @@ class VEnv:
         return f"{self.env_folder}\n{self.spec.pyver}\n{dep_list}"
 
 
+@prefab
 class VEnvCache:
     MAX_CACHESIZE = 5  # Don't keep more than this many virtualenvs
     ENV_PREFIX = "cached_venv_"
 
     cache_path: str
     venvs: list[VEnv]
-
-    def __init__(self, cache_path, venvs):
-        self.cache_path = cache_path
-        self.venvs = venvs
-
-    def __repr__(self):
-        return (
-            f"{type(self).__name__}("
-            f"cache_path={self.cache_path!r}, "
-            f"venvs={self.venvs!r}"
-            f")"
-        )
 
     @property
     def cache_info_path(self):

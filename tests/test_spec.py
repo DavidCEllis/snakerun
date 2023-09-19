@@ -4,7 +4,7 @@ import pytest
 
 from snakerun.core import DependencySpec
 
-examples_folder = pathlib.Path("../examples")
+examples_folder = pathlib.Path(__file__).parents[1] / "examples"
 
 specs = [
     ("pep_example_script.py", DependencySpec(pyver=None, dependencies=['requests', 'rich'])),

@@ -36,7 +36,7 @@ pub fn parse_pep722(source_path: &PyString) -> PyResult<(Option<String>, Vec<Str
                 if !dependency.is_empty() {
                     // Remove in-line comment if present
                     if let Some(split_dep) = dependency.split_once(" # ") {
-                        dependency = split_dep.0
+                        dependency = split_dep.0.trim();
                     }
                     dependencies.push(String::from(dependency));
                 }
