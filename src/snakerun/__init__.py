@@ -5,10 +5,12 @@ Parse a meaningful comment form to get the requirements for a python script.
 Launch a python environment matching those requirements.
 
 Usage:
-`snakerun your_script.py`
+`snakerun launch your_script.py`
 
-Command-line arguments:
---clear-cache
+Subcommands:
+launch
+    launch a python script - generating the required venv if necessary
+clear-cache
     Delete all virtual environments created by snake_run
 """
 
@@ -36,7 +38,7 @@ else:
     raise UnsupportedPlatform(f"'{platform}' is currently not supported.")
 
 
-CACHE_INFO_FILENAME = f"CACHE_INFO_{version_pth}"
+CACHE_INFO_FILENAME = f"CACHE_INFO_{version_pth}.json"
 
 
 def main():

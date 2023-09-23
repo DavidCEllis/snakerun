@@ -16,3 +16,7 @@ class Config:
         The builtin prefab-classes as_dict function is intended for multiple uses in one program.
         """
         return {f: getattr(self, f) for f in getattr(self, "PREFAB_FIELDS")}
+
+    def print(self, message):
+        if not self.quiet_mode:
+            print(message)
