@@ -1,3 +1,9 @@
+** Archived after the acceptance of PEP-723 ** 
+
+I will make a new module to support the PEP-723 semantics rather than continuing this one.
+
+---
+
 **The format used for this is still subject to change.**
 
 **This is currently an experiment with using the PEP-722 style dependency format and is only lightly tested.**
